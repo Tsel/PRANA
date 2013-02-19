@@ -6,7 +6,7 @@ import networkx as nx
 #
 # This file contains routines to process HI-Data
 #
-def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011"):
+def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", state=""):
     #
     #assert fnEdgeList=="", "Namen des Files angeben"    
     #
@@ -31,8 +31,12 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011"):
             domesticTrade = True
         #
         #print "Kreis ist: "+bnr_vb[3:8]
-        if(bnr_vb[3:8]=="05554"):
-            inKreis = True
+
+	    if(state == ""):
+	        inKreis = True
+        else:
+            if(bnr_vb[3:8]==state):
+                inKreis = True
             
         if(sdate <= date and date < edate):
             inTimeWindow=True
