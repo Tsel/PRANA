@@ -6,7 +6,7 @@ import networkx as nx
 #
 # This file contains routines to process HI-Data
 #
-def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", state=""):
+def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", SID="", TID=""):
     #
     #assert fnEdgeList=="", "Namen des Files angeben"    
     #
@@ -16,6 +16,27 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", 
     edate = datetime.strptime(enddate,"%d.%m.%Y").date()
     reader = csv.reader(open(fnEdgeList, "rb"), delimiter=";")
     #
+#
+#   ueber SourceID und TargetID erfolgt der Zugriff auf geografische Einheiten ueber die BNR
+#   diese ist wie folgt aufgebaut
+#   SSS ll R ll ggg nnnn
+#   SSS stellt den Staat dar: 276 fuer Deutschland
+#   ll  ist das Bundesland 01 - 16
+#   R   ist der Regierungsbezirk
+#   ll  ist der Landkreis
+#   ggg ist die Gemeindenummer
+#   nnnn laufende Nummmer
+#
+#   SID und TID koennen nur bestimmte Loesngen haben (valid ID lengths [vIDl]), gemaess der obigen Zuordnung
+    vIDl = (0, 3, 5, 8, 11, 15)
+#   Laengen bestimmen und ueberpruefen
+#
+    SIDl = len(SID)
+    TIDl = len(TID)
+    if(SIDl not in vIDl or TIDl not in vIDl):
+        print "Malformat (length) "+SID+" or "+TID
+        raise SystemExit(0)
+
     headerline = reader.next()
     for row in reader:
         domesticTrade=False
@@ -27,12 +48,13 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", 
         volume = row[3]
         date=datetime.strptime(d,"%d%b%Y").date()
         #
-        # filter the data according ot the State, the time window and the Federal state
+        # filter the data according to SID and TID, the time window and the Federal state
         #
-        if(bnr_vb[:3]!="276" or bnr_nb[:3]!="276"): continue
+        if(bnr_vb[:SIDl]!=SID or bnr_nb[:TIDl]!=TID): continue
         #
-        if(state !="" and bnr_vb[3:8]!=state): continue
+        # if(state !="" and bnr_vb[3:8]!=state): continue
         #
+        print str(row) + " is valid"
         if(date < sdate and date >= edate): continue
         #
         G.add_edge(bnr_vb, bnr_nb)
@@ -44,7 +66,7 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", 
 
 if __name__=="__main__":
     G = nx.DiGraph()
-    HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg_sample.csv","01.04.2001","01.12.2001")
+    HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg_sample.csv","01.04.2001","01.12.2001","","27502")
     print "Starting HIT2DiGraph "
     #HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg.csv","01.09.2009","01.12.2009") # 8 Jahre in der Untersuchung
     #HIT2DiGraph(G,"/Users/tselhorst/Forschungsprojekte/SliLeBAT/Handelnetz Rinder/Daten/sanHIT_2002-2009dg.csv","01.01.2009","01.11.2009") # 8 Jahre in der Untersuchung
