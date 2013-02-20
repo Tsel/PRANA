@@ -34,7 +34,7 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", 
     SIDl = len(SID)
     TIDl = len(TID)
     if(SIDl not in vIDl or TIDl not in vIDl):
-        print "Malformat (length) "+SID+" or "+TID
+        print "Malformat (length) >"+SID+"< or >"+TID+"<"
         raise SystemExit(0)
 
     headerline = reader.next()
@@ -66,7 +66,7 @@ def HIT2DiGraph(G, fnEdgeList="", startdate="01.01.1999", enddate="31.12.2011", 
 
 if __name__=="__main__":
     G = nx.DiGraph()
-    HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg_sample.csv","01.04.2001","01.12.2001","","27502")
+    HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg_sample.csv","01.04.2001","01.12.2001","","27")
     print "Starting HIT2DiGraph "
     #HIT2DiGraph(G,"/Users/tselhorst/SNA Cattle/r_beweg.csv","01.09.2009","01.12.2009") # 8 Jahre in der Untersuchung
     #HIT2DiGraph(G,"/Users/tselhorst/Forschungsprojekte/SliLeBAT/Handelnetz Rinder/Daten/sanHIT_2002-2009dg.csv","01.01.2009","01.11.2009") # 8 Jahre in der Untersuchung
