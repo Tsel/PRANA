@@ -1,4 +1,4 @@
 PRANA
 =====
 
-Programs for network analysis
+Programs for network analysis in Python.
