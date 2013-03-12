@@ -6,18 +6,26 @@ from datetime import datetime
 
 outcomponent = set()
 
-def find_successors_in_time(G, start_node, from_date=""):
+def find_successors_in_time(G, start_node, from_date="",k=0):
     fd = datetime.strptime(from_date.title(),"%d%b%Y").date()
-    outcomponent.add(start_node)
+    # outcomponent.add(start_node)
     succ = G.successors(start_node)
-    for n in succ:
+    k = k+1
+    for n in succ:  # n is a node
         e = (start_node, n)
         dot = G.get_edge_data(*e)["trade_date"]
         ddot = datetime.strptime(dot.title(),"%d%b%Y").date()
         #print ddot
         if(ddot >= fd and n not in outcomponent):
+            # if node is selected we add information to the node
+#            if('toc' in G.node[n]):
+#                G.node[n]['toc'] += ddot-fd
+#            else:
+#                G.node[n]['toc'] = ddot-fd
+            G.node[n]['toc'] = G.node[start_node]['toc'] + (ddot-fd)
+            G.node[n]['k']=k
             outcomponent.add(n)
-            find_successors_in_time(G, n, dot)
+            find_successors_in_time(G, n, dot,k)
     
     #print len(outcomponent)
 
@@ -33,17 +41,25 @@ def getStartNodes(fn=""):
 #
 if __name__ == "__main__":
     print "Create network G"
-    G = nx.read_edgelist("/Users/tselhorst/Forschungsprojekte/PRANA/Cattle_Trade_01092009_31112009.csv",delimiter=";",create_using=nx.DiGraph(), nodetype=str, data=(('trade_date',str),))
+    G = nx.read_edgelist("/Users/tselhorst/Forschungsprojekte/Rinder/Handelsdaten/Cattle_Trade_01092009_31112009.csv",delimiter=";",create_using=nx.DiGraph(), nodetype=str, data=(('trade_date',str),))
     print "G has nodes "+str(G.number_of_nodes())
     print "Read start nodes for out component"
-    startnodes = getStartNodes(fn="/Users/tselhorst/Forschungsprojekte/PRANA/Sources_05554.csv")
+    startnodes = getStartNodes(fn="/Users/tselhorst/Forschungsprojekte/Rinder/OutComponent/Sources_03456.csv")
+    start_date = "01Sep2009"
     for node in startnodes:
-        find_successors_in_time(G,node,"01Sep2009")
+        sd = datetime.strptime(start_date.title(),"%d%b%Y").date()
+        G.node[node]['toc']=sd-sd
+        G.node[node]['k']=0
+        outcomponent.add(node)
+
+    for node in startnodes:
+        find_successors_in_time(G,node,start_date,k=0)
 
     print len(outcomponent)
 
+#    print G.nodes(data=True)
     for n in outcomponent:
-        print n
+        print n, G.node[n]['toc'].days, G.node[n]['k']
     #outcomponent = set()
     #print "Calculate all reachable nodes from start nodes"
     #index = 0
