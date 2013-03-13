@@ -28,7 +28,9 @@ def find_successors_in_time(G, start_node, from_date="",k=0):
             find_successors_in_time(G, n, dot,k)
         if(n in outcomponent):
             print "node present in outcomponent"
-            print n, G.node[n]['toc'], G.node[n]['k']
+            if(ddot < G.node[n]['toc']):
+                print "there exists an earlier contact"
+                print n, G.node[n]['toc'], ddot
                        
     #print len(outcomponent)
 
