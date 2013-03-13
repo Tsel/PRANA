@@ -26,7 +26,10 @@ def find_successors_in_time(G, start_node, from_date="",k=0):
             G.node[n]['k']=k
             outcomponent.add(n)
             find_successors_in_time(G, n, dot,k)
-    
+        if(n in outcomponent):
+            print "node present in outcomponent"
+            print n, G.node[n]['toc'].days, G.node[n]['k']
+                       
     #print len(outcomponent)
 
 def getStartNodes(fn=""):
@@ -41,10 +44,10 @@ def getStartNodes(fn=""):
 #
 if __name__ == "__main__":
     print "Create network G"
-    G = nx.read_edgelist("/Users/tselhorst/Forschungsprojekte/Rinder/Handelsdaten/Cattle_Trade_01092009_31112009.csv",delimiter=";",create_using=nx.DiGraph(), nodetype=str, data=(('trade_date',str),))
+    G = nx.read_edgelist("/Users/tselhorst/Forschungsprojekte/Rinder/Handelsdaten/virtualTrade.csv",delimiter=";",create_using=nx.DiGraph(), nodetype=str, data=(('trade_date',str),))
     print "G has nodes "+str(G.number_of_nodes())
     print "Read start nodes for out component"
-    startnodes = getStartNodes(fn="/Users/tselhorst/Forschungsprojekte/Rinder/OutComponent/Sources_03456.csv")
+    startnodes = getStartNodes(fn="/Users/tselhorst/Forschungsprojekte/Rinder/Handelsdaten/virtualTrade_sources.csv")
     start_date = "01Sep2009"
     for node in startnodes:
         sd = datetime.strptime(start_date.title(),"%d%b%Y").date()
