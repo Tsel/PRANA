@@ -23,7 +23,7 @@ def find_successors_in_time(G, start_node, from_date="",k=0):
 #            else:
 #                G.node[n]['toc'] = ddot-fd
             G.node[n]['toc'] = ddot
-            G.node[n]['ttc'] = G.node[start_node][ttc] + (ddot-fd)
+            G.node[n]['ttc'] = G.node[start_node]['ttc'] + (ddot-fd)
             G.node[n]['k']=k
             outcomponent.add(n)
             find_successors_in_time(G, n, dot,k)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
 #    print G.nodes(data=True)
     for n in outcomponent:
-        print n, G.node[n]['toc'], G.node[n]['k']
+        print n, G.node[n]['toc'], G.node[n]['ttc'].days, G.node[n]['k']
     #outcomponent = set()
     #print "Calculate all reachable nodes from start nodes"
     #index = 0
