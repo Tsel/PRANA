@@ -9,6 +9,40 @@ from collections import defaultdict
 
 outcomponent = set()
 
+def my_bfs_edges(G, source):
+    """ Adapted Producure to produce edges in breath-first search starting at source. """
+    visited = set([source])
+    stack = [(source, iter(G[source]))]
+    while stack:
+        parent, children = stack[0]
+        try:
+            child = next(children)
+            e = (parent, child)
+            sDoC = G.get_edge_data(*e)["trade_date"]
+            DoC  = datetime.strptime(sDoC.title(), "%d%b%Y").date()
+
+            if child not in visited and DoC > G.node[parent]['doi']:
+                G.node[child]['k']=G.node[parent][k]+1
+                G.node[child]['doi']=DoC
+                G.node[child]['ttc'] = G.node[parent]['ttc'] + (DoC - G.node[parent]['doi']) 
+                yield parent, child
+                visited.add(child)
+                stack.append((child, iter(G[child])))
+            elif child in visited and DoC < G.node[child]['doi'] and DoC > G.node[parent]['doi']:
+                G.node[child]['ttc'] = G.node[parent]['ttc'] + (DoC - G.node[parent]['doi']) 
+                G.node[child]['doi'] = DoC
+                G.node[child]['k']=G.node[parent][k]+1
+                yield parent, child
+        except StopIteration:
+            stack.pop(0)
+
+def my_bfs_successors(G, source):
+    d = defaultdict(list)
+    for s,t in my_bfs_edges(G, source):
+        d[s].append(t)
+    return d
+
+
 def bfs_edges_chrono(G, source):
     """ Produced edges in breadth-first search starting at source considering chronology. """
     # Based on the algorithm described at 
@@ -31,7 +65,7 @@ def bfs_edges_chrono(G, source):
                 visited.add(child)
                 stack.append((child,iter(G[child])))
             elif child in visited and DoC < G.node[child]["doi"] and DoC > G.node[parent]["doi"]:
-                print "This is an earlier contact ", parent, child, DoC
+                print "This is an earlier contact ", parent, child
                 print stack
                 #print visited
                 yield parent,child
@@ -150,16 +184,36 @@ if __name__ == "__main__":
     #print str(noNodesINlSCC) + " of "+str(len(startnodes)) + " in lSCC"
 
     #sys.setrecursionlimit(9000)
+    ChronoGraph = nx.DiGraph()
     for node in startnodes:
-        el = bfs_successors_chrono(G, node)
+        print "-----------------"
+        print "Startnode ", node
+        el = my_bfs_successors(G, node)
         for s in el:
             for t in el[s]:
-                e = (s,t)
-                print s, t, G.get_edge_data(*e)["trade_date"]
-        #    for t in el[s]
-        #        print s, t
-    #    find_successors_in_time(G,node,start_date,k=0)
+                edge = (s,t)
+                sedgeDoC = (G.get_edge_data(*edge)['trade_date'])
+                t_in_e = ChronoGraph.in_edges(t)
+                if(len(t_in_e) == 0):
+                    ChronoGraph.add_edge(s,t, trade_date=sedgeDoC)
+                else:
+                    edgeDoC = datetime.strptime(G.get_edge_data(*edge)['trade_date'].title(),"%d%b%Y").date()
+                    #print s, t, edgeDoC
+                    # in edges von t suchen
+                    for e in ChronoGraph.in_edges(t):
+                        t_inDoC = datetime.strptime(G.get_edge_data(*e)['trade_date'].title(),"%d%b%Y").date()
+                        #print "tested edge ", t_in_e, t_inDoC, edgeDoC
+                        if(t_inDoC > edgeDoC):
+                            print "edge deleted ",e
+                            ChronoGraph.remove_edge(*e)
+                            print "edge added   ", s, t
+                            ChronoGraph.add_edge(s,t,trade_date=sedgeDoC)
 
+    #print ChronoGraph.edges()
+    print "Graph has nodes ", nx.number_of_nodes(ChronoGraph)
+
+
+         
 
 #   Out component to file
     # OC2file(G, outcomponent, fn="/Users/tselhorst/Forschungsprojekte/Rinder/Handelsdaten/OC_S05554.csv")
