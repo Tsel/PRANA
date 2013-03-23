@@ -4,7 +4,7 @@
 File: Tracing.py
 Author: Thomas Selhorst <Thomas.Selhorst@fli.bund.de>
 Description: 
-    This script contains a file for chronological Breadth first search
+    This script contains functions for chronological Breadth first search
 
 '''
 import networkx as nx
@@ -16,7 +16,25 @@ outcomponent = set()
 
 def my_bfs_edges_m(G, source):
     """ Adapted procedure to produce edges in breadth-first search statring at source. """
-    """ set visited is not needed, because all necessary information is stored at the node level """
+    """ This function is essentially identical to that one at 
+        http://networkx.github.com/documentation/latest/_modules/networkx/algorithms/traversal/breadth_first_search.html#bfs_edges 
+        There are two exceptiioins: """
+   
+    """ 1.) In the original function provides a set called visited where all the
+    nodes are stored which were, as stated, already visited. This is not needed
+    here because the information wheter and when a node was visited is stored
+    at the node level.
+    2.) The selection of nodes for bfs differs. A node is selected if:
+        a) the node has no doi (date of infection), i.e. the node has never
+        been selected before
+        b) the node is selected again, when there is - in comparison to the old
+        date of infection - an earlier date. DoC is the date of contact and if
+        DoC < doi of the node, then the node is selected
+        c) the node is selected if the infector of this  node has changed
+        d) The node will only be selected if the parent node has an doi, and if
+        this date of infection is before the actual contact. This guarantees
+        that the node can only be infected by an infected parent node """
+
     stack = [(source, iter(G[source]))]
     while stack:
         parent, children = stack[0]
@@ -25,6 +43,8 @@ def my_bfs_edges_m(G, source):
             e = (parent, child)
             sDoC = G.get_edge_data(*e)["trade_date"]
             DoC  = datetime.strptime(sDoC.title(), "%d%b%Y").date()
+            """ this if clause is diffent from the original bfs search
+            function. Everything else is identical """
             if ('doi' not in G.node[child] or DoC < G.node[child]['doi'] or (DoC == G.node[child]['doi'] and G.node[child]['Infector'] != G.node[parent]['Infector'])) and (DoC > G.node[parent]['doi']):
                 G.node[child]['k'] = G.node[parent]['k']+1
                 G.node[child]['doi'] = DoC
@@ -42,6 +62,7 @@ def my_bfs_successors(G, source):
     return d
 
 def getStartNodes(fn=""):
+    """ This function reads a file with the start nodes to be considered"""
     print "File is " + fn
     reader=csv.reader(open(fn, "rb"), delimiter=";")
 
@@ -50,9 +71,10 @@ def getStartNodes(fn=""):
         nodes.add(row[0])
 
     return nodes
-#
 
 def OC2file(G, oc, fn=""):
+    """ This function writes the start nodes and the nodes reached by the start
+    nodes to a file """
     writer = csv.writer(open(fn, "wb"))
 
     writer.writerow(["BNR","ttc","k"])
