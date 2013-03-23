@@ -1,10 +1,15 @@
 #! /usr/bin/python##
 #
+'''
+File: Tracing.py
+Author: Thomas Selhorst <Thomas.Selhorst@fli.bund.de>
+Description: 
+    This script contains a file for chronological Breadth first search
+
+'''
 import networkx as nx
 import csv
 from datetime import datetime
-import random as rand
-import sys
 from collections import defaultdict
 
 outcomponent = set()
@@ -281,9 +286,6 @@ if __name__ == "__main__":
     #print "distinct nodes in set ", len(distinctNodes)
     for n in distinctNodes:
         print n
-
-
-
 
          
 
